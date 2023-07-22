@@ -4,50 +4,20 @@
     <style> rect {fill: lightblue; stroke: black; }</style>
 
     <body>
-        <svg width=300 height=300></svg>
+        <svg width=3000 height=3000></svg>
 
     <script>
-        document.write("hi");
-        
-        // sanity check: trying to display chart from previous assignment first
-        var data = [4, 8, 15, 16, 23, 42];
-        var margin = 50;
-        var width = 300 - (2 * margin);
-        var height = 300 - (2 * margin);
-        var bottomRight = 300 - margin;
-
-        var svg = d3.select('svg')
-        .append('g')
-        .attr('transform', 'translate(' + margin + ',' + margin + ')');
-
-        var x = d3.scaleBand()
-        .domain([0, 1, 2, 3, 4, 5])
-        .range([0, width]);
-
-        var y = d3.scaleLinear()
-        .domain([0, d3.max(data)])
-        .range([height, 0]);
-
-        svg.selectAll('rect')
-        .data(data)
-        .enter()
-        .append('rect')
-        .attr('x', function(d, i) { return x(i); })
-        .attr('y', function(d) { return y(d); })
-        .attr('width', x.bandwidth())
-        .attr('height', function(d) { return height - y(d); });
-
-        var yAxis = d3.axisLeft(y)
-        .ticks(10);
-        svg.append('g')
-        .attr('transform', 'translate(' + margin + ',' + margin + ')')
-        .call(yAxis);
-
-        var xAxis = d3.axisBottom(x);
-        svg.append('g')
-        .attr('transform', 'translate(' + margin + ',' + bottomRight + ')')
-        .call(xAxis);
-
+        const covidData = await d3.csv("WHO-COVID-19-global-table-data.csv")
+        // parse the data values accordingly
+        covidData.forEach(function(d) {
+            d.country = d["Name"];
+            d.region = d["WHO Region"]
+            d.totalCases = +d["Cases - cumulative total"]
+            d.casesPer100k = +d["Cases - cumulative total per 100000 population"]
+            d.totalDeaths = +d["Deaths - cumulative total"]
+            d.deathsPer100k = +d["Deaths - cumulative total per 100000 population"]
+        });
+        document.write("hello there");
     </script>
     </body>
 </html>
