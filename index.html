@@ -7,7 +7,8 @@
         <svg width=3000 height=3000></svg>
 
     <script>
-        const covidData = await d3.csv("WHO-COVID-19-global-table-data.csv")
+        document.write("did not upload the data yet");
+        const covidData = await d3.csv("https://gist.github.com/tylerlee2020/28bf60324102e7dca8599d639499b517")
         // parse the data values accordingly
         covidData.forEach(function(d) {
             d.country = d["Name"];
