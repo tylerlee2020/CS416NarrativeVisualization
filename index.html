@@ -1,1 +1,66 @@
-<h1>Hello</h1>
+<html>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+    <style> rect {fill: lightblue; stroke: black; }</style>
+
+    <body>
+        <svg width=300 height=300></svg>
+
+    <script>
+        d3.csv("WHO-COVID-19-global-table-data.csv").then(function (data) {
+            // Access and process the parsed data here
+            data.forEach(function (d) {
+                // Access individual fields by their column names and convert them to the desired data types
+                const country = d["Name"];
+                const region = d["WHO Region"];
+                const totalCases = +d["Cases - cumulative total"];
+                const casesPer100k = +d["Cases - cumulative total per 100000 population"];
+                const totalDeaths = +d["Deaths - cumulative total"];
+                const deathsPer100k = +d["Deaths - cumulative total per 100000 population"];
+
+                // Perform further data manipulation or store the processed data for visualization
+            });
+        });
+
+        // sanity check: trying to display chart from previous assignment first
+        var data = [4, 8, 15, 16, 23, 42];
+        var margin = 50;
+        var width = 300 - (2 * margin);
+        var height = 300 - (2 * margin);
+        var bottomRight = 300 - margin;
+
+        var svg = d3.select('svg')
+        .append('g')
+        .attr('transform', 'translate(' + margin + ',' + margin + ')');
+
+        var x = d3.scaleBand()
+        .domain([0, 1, 2, 3, 4, 5])
+        .range([0, width]);
+
+        var y = d3.scaleLinear()
+        .domain([0, d3.max(data)])
+        .range([height, 0]);
+
+        svg.selectAll('rect')
+        .data(data)
+        .enter()
+        .append('rect')
+        .attr('x', function(d, i) { return x(i); })
+        .attr('y', function(d) { return y(d); })
+        .attr('width', x.bandwidth())
+        .attr('height', function(d) { return height - y(d); });
+
+        var yAxis = d3.axisLeft(y)
+        .ticks(10);
+        svg.append('g')
+        .attr('transform', 'translate(' + margin + ',' + margin + ')')
+        .call(yAxis);
+
+        var xAxis = d3.axisBottom(x);
+        svg.append('g')
+        .attr('transform', 'translate(' + margin + ',' + bottomRight + ')')
+        .call(xAxis);
+
+    </script>
+    </body>
+</html>
