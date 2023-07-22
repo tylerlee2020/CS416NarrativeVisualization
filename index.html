@@ -7,30 +7,6 @@
         <svg width=300 height=300></svg>
 
     <script>
-        // d3.csv("WHO-COVID-19-global-table-data.csv").then(function (data) {
-        //     // Access and process the parsed data here
-        //     data.forEach(function (d) {
-        //         // Access individual fields by their column names and convert them to the desired data types
-        //         const country = d["Name"];
-        //         const region = d["WHO Region"];
-        //         const totalCases = +d["Cases - cumulative total"];
-        //         const casesPer100k = +d["Cases - cumulative total per 100000 population"];
-        //         const totalDeaths = +d["Deaths - cumulative total"];
-        //         const deathsPer100k = +d["Deaths - cumulative total per 100000 population"];
-
-        //         // Perform further data manipulation or store the processed data for visualization
-        //     });
-        // });
-        const covidData = await d3.csv("WHO-COVID-19-global-table-data.csv")
-        // parse the data values accordingly
-        covidData.forEach(function(d) {
-            d.country = d["Name"];
-            d.region = d["WHO Region"]
-            d.totalCases = +d["Cases - cumulative total"]
-            d.casesPer100k = +d["Cases - cumulative total per 100000 population"]
-            d.totalDeaths = +d["Deaths - cumulative total"]
-            d.deathsPer100k = +d["Deaths - cumulative total per 100000 population"]
-        });
         document.write("hi");
         
         // sanity check: trying to display chart from previous assignment first
