@@ -21,7 +21,18 @@
         //         // Perform further data manipulation or store the processed data for visualization
         //     });
         // });
-
+        const covidData = await d3.csv("WHO-COVID-19-global-table-data.csv")
+        // parse the data values accordingly
+        covidData.forEach(function(d) {
+            d.country = d["Name"];
+            d.region = d["WHO Region"]
+            d.totalCases = +d["Cases - cumulative total"]
+            d.casesPer100k = +d["Cases - cumulative total per 100000 population"]
+            d.totalDeaths = +d["Deaths - cumulative total"]
+            d.deathsPer100k = +d["Deaths - cumulative total per 100000 population"]
+        });
+        document.write("hi");
+        
         // sanity check: trying to display chart from previous assignment first
         var data = [4, 8, 15, 16, 23, 42];
         var margin = 50;
