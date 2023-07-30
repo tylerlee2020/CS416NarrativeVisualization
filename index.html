@@ -1,24 +1,39 @@
+<!DOCTYPE html>
 <html>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
-    <style> rect {fill: lightblue; stroke: black; }</style>
-
     <body>
-        <svg width=3000 height=3000></svg>
-
-    <script>
-        document.write("did not upload the data yet");
-        const covidData = await d3.csv("https://gist.github.com/tylerlee2020/28bf60324102e7dca8599d639499b517")
-        // parse the data values accordingly
-        covidData.forEach(function(d) {
-            d.country = d["Name"];
-            d.region = d["WHO Region"]
-            d.totalCases = +d["Cases - cumulative total"]
-            d.casesPer100k = +d["Cases - cumulative total per 100000 population"]
-            d.totalDeaths = +d["Deaths - cumulative total"]
-            d.deathsPer100k = +d["Deaths - cumulative total per 100000 population"]
-        });
-        document.write("hello there");
-    </script>
+    <div id="introContainer">
+        <h1>Fueling Your Drive: Discovering Your Ideal Car Match</h1>
+        <p>
+            Whether you're a seasoned road warrior or a first-time driver, we understand that
+                    finding the perfect car can be a thrilling yet daunting endeavor.
+        </p>
+        <p>
+            Our mission is to present you with a collection of powerful data-driven scenes that
+                    will steer you toward the ride based on your needs.
+        </p>
+        <p>
+            First, we'll dive into the fuel economy, in particular exploring the spectrum of
+                    gasoline, electric, and diesel-powered cars. With this scene, you'll be equipped to
+                    decide which type of fuel aligns with your driving style.
+        </p>
+        <p>
+            Next, we'll dissect the top car companies and reveal their average fuel efficiency
+                    on the highway and in the cities. We know that you will have their favorite car
+                    company, and we are hopeful that our data can help you make an educated decision on
+                    your next car. From classic legends to modern marvels, you'll discover the stars of
+                    the automotive world, each vying to be your co-pilot on your road to adventure.
+        </p>
+        <p>
+            Lastly, we'll hand over the steering wheel to you! Engage in an interactive session
+                    where you can fine-tune your preferences based on the number of engine cylinders
+                    you want in your car. In other words, if you want a car high in horsepower, a car
+                    that's more eco-friendly, or a car somewhere in between.
+        </p>
+        <p>
+            So fasten your seatbelts, and together, we'll navigate the automotive landscape
+                unlocking the door to your perfect ride!
+        </p>
+        <p>Click <a href="scenes.html">here</a> to start!</p></div>
+    </div>
     </body>
 </html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+    <style>
+        circle {fill: lightblue; stroke: black;}
+        /* Style for the "Next Scene" button */
+        button {
+            position: relative;
+            bottom: 20px;
+            left: -1200px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+    <body>
+    <!-- Add an element with the id "header" to hold the header text -->
+    <h1 id="header">Default Header</h1>
+    <!-- Add a container element to hold the paragraphs -->
+    <div id="paragraphContainer"></div>
+    <svg width=1200 height=1000></svg>
+    <button id="nextButton">Next Scene</button> <!-- Add the button for changing scenes -->
+    <script>
+        // load the car data
+        const carData = "https://gist.githubusercontent.com/tylerlee2020/418c6ddb3d52324dad9fb43dfbf85c4d/raw/a2fd06798136ba869f5da5388fabb6d1193a5a74/cars2017.csv";
+        let svg, margin, width, height, g;
+
+        const sceneTexts = [
+            {
+                header: "Overview of Fuel Efficiency by Fuel Type",
+                paragraphs: [
+                    "One way in deciding how you want to choose your next car may be the type of fuel your  \
+                    car uses. You may want a car that runs on gasoline, or you may want an electric car, or \
+                    maybe even on diesel if you need your new car for a specific purpose. In this chart,    \
+                    we've analyzed the fuel efficiency of our cars, so you can find the perfect match for   \
+                    your driving needs. We've categorized the cars into the three aforementioned fuel types.",
+                    "On the x-axis, you'll find the fuel types, while the y-axis axis represents the fuel   \
+                    efficiency in terms of miles per gallon (MPG). The higher the MPG, the more efficient   \
+                    the car is, saving you valuable dollars on fuel expenses.",
+                    "Have a look at the dark blue bars. They show the average highway MPG for each fuel type.\
+                    If you're a frequent highway traveler, you'll want a car with a longer blue bar, ensuring\
+                    you get the most out of every gallon!",
+                    "And what about city driving? Well, the green bars represent the average   \
+                    city MPG. If you spend most of your time navigating city streets, you'll want a car with\
+                    an longer green bar, as it indicates superb fuel efficiency even in stop-and-go traffic.",
+                    "So, whether you're cruising on the highway or maneuvering through the city, this chart  \
+                    provides valuable insights to help you find your perfect car match. Remember, higher MPG\
+                    means fewer stops at the pump, more money in your pocket, and a greener drive for a     \
+                    sustainable future!",
+                    "When you're ready, scroll down and click the 'next scene' button to move on!"
+                ]
+            },
+            {
+                header: "Exploration of Fuel Efficiency by Company",
+                paragraphs: [
+                    "Another way in deciding your next car is that you may want a car from a certain company.\
+                    In this chart, we've assembled a collection of companies whose cars we have in stock today.",
+                    "On the x-axis, you can see the list of car companies that we sell from. We have a diverse set\
+                    of options, from Acura to Volvo. These brands have crafted iconic vehicles, each with its unique\
+                    charm, ready to accompany you on your road to adventure.",
+                    "On the y-axis, we measure fuel efficiency in terms of miles per gallon (MPG). \
+                    The higher the MPG, the more miles you can conquer with every precious gallon of fuel, \
+                    saving you valuable dollars and contributing to a greener planet.",
+                    "The blue bars represent the average highway MPG for each car company. \
+                    If you're a road warrior who enjoys long drives or embarks on thrilling road trips, \
+                    these blue bars are your guide to the ultimate highway efficiency.",
+                    "The green bars signify the average city MPG for each manufacturer. \
+                    For the urban explorer in you, these bars reveal which vehicles effortlessly glide \
+                    through city traffic, offering exceptional fuel efficiency in stop-and-go situations.",
+                    "From fuel type to car company, we hope that our data on fuel efficiency has given \
+                    you a more clear idea of which car you want to use for the future! If you're still undecided,\
+                    feel free to click the button on the bottom left corner of our page in order to get a more \
+                    interactive experience when viewing data on the engine cylinders of our cars. \
+                    This should hopefully give you more clarity on which car you want next for the future!",
+                    "When you're ready, scroll down and click the 'next scene' button to move on!"
+                ]
+            }
+        ];
+
+        d3.csv(carData).then(function (data) {
+            // parse the data values accordingly
+            data.forEach(function (d) {
+                d.companies = d.Make;
+                d.fuel = d.Fuel;
+                d.engineCylinders = +d.EngineCylinders;
+                d.averageHighwayMPG = +d.AverageHighwayMPG;
+                d.averageCityMPG = +d.AverageCityMPG;
+            });
+
+            // Initialize global SVG, margin, width, height, and g
+            svg = d3.select("svg");
+            margin = { top: 50, right: 100, bottom: 100, left: 100 };
+            width = +svg.attr("width") - margin.left - margin.right;
+            height = +svg.attr("height") - margin.top - margin.bottom;
+            g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            let currentScene = 1;
+
+            // Function to render the current scene
+            function renderScene() {
+                // Clear the visualization container
+                g.selectAll("*").remove();
+
+                d3.select("#paragraphContainer").html("");
+
+                // Update header and paragraph text
+                const headerElement = document.getElementById("header");
+
+                // Display multiple paragraphs for the current scene
+                const paragraphContainer = d3.select("#paragraphContainer");
+                sceneTexts[currentScene - 1].paragraphs.forEach(paragraph => {
+                    paragraphContainer.append("p").text(paragraph);
+                });
+
+                headerElement.textContent = sceneTexts[currentScene - 1].header;
+
+                // Create a new group element for each scene
+                const sceneGroup = g.append("g");
+
+                // Switch between different scenes based on the currentScene parameter
+                switch (currentScene) {
+                    case 1:
+                        renderScene1(sceneGroup);
+                        break;
+                    case 2:
+                        renderScene2(sceneGroup);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // Add event listener to the next scene button
+            document.getElementById("nextButton").addEventListener("click", function () {
+                if (currentScene < 2) {
+                    currentScene++;
+                    renderScene();
+                }
+                else if (currentScene == 2) {
+                    currentScene++;
+                    window.location.href = "main-engine-cylinder-scene.html";
+                    renderScene();
+                }
+            });
+
+            // call the function to render the initial scene
+            renderScene();
+
+            function renderScene1(sceneGroup) {
+                // extract data for the first scene
+                const fuelTypes = ["Gasoline", "Electricity", "Diesel"];
+
+                // Initialize empty arrays to store average MPG values for each fuel type
+                let averageHighwayMPGs = [];
+                let averageCityMPGs = [];
+
+                // Loop through the fuelTypes array to filter and extract data
+                fuelTypes.forEach(fuelType => {
+                    // Filter the data for the current fuel type
+                    const filteredData = data.filter(d => d.Fuel === fuelType);
+
+                    // Calculate the average highway MPG and average city MPG for the current fuel type
+                    const averageHighwayMPG = d3.mean(filteredData, d => d.AverageHighwayMPG);
+                    const averageCityMPG = d3.mean(filteredData, d => d.AverageCityMPG);
+
+                    // Push the average MPG values to the corresponding arrays
+                    averageHighwayMPGs.push(averageHighwayMPG);
+                    averageCityMPGs.push(averageCityMPG);
+                });
+
+                // Define x and y scales
+                const xScale = d3.scaleBand()
+                    .domain(fuelTypes)
+                    .range([0, width])
+                    .padding(0.2);
+
+                const yScale = d3.scaleLinear()
+                    .domain([0, d3.max(averageHighwayMPGs.concat(averageCityMPGs))])
+                    .range([height, 0]);
+
+                // Draw the x and y axes
+                sceneGroup.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(xScale))
+                    .append("text") // X-axis title
+                    .attr("x", width / 2)
+                    .attr("y", margin.bottom * 0.8)
+                    .attr("fill", "black")
+                    .attr("font-size", "16px")
+                    .attr("text-anchor", "middle")
+                    .text("Fuel Type");
+
+                sceneGroup.append("g")
+                    .call(d3.axisLeft(yScale).ticks(10))
+                    .append("text") // Y-axis title
+                    .attr("x", -height / 2)
+                    .attr("y", -margin.left * 0.8)
+                    .attr("fill", "black")
+                    .attr("font-size", "16px")
+                    .attr("text-anchor", "middle")
+                    .attr("transform", "rotate(-90)")
+                    .text("Fuel Efficiency (Miles per Gallon)");
+
+                // Draw the grouped bars for average highway MPG
+                sceneGroup.selectAll(".bar-highway")
+                    .data(averageHighwayMPGs)
+                    .enter().append("rect")
+                    .attr("class", "bar-highway")
+                    .attr("x", (d, i) => xScale(fuelTypes[i]))
+                    .attr("y", d => yScale(d))
+                    .attr("width", xScale.bandwidth() / 2)
+                    .attr("height", d => height - yScale(d))
+                    .attr("fill", "blue");
+
+                // Draw the grouped bars for average city MPG
+                sceneGroup.selectAll(".bar-city")
+                    .data(averageCityMPGs)
+                    .enter().append("rect")
+                    .attr("class", "bar-city")
+                    .attr("x", (d, i) => xScale(fuelTypes[i]) + xScale.bandwidth() / 2)
+                    .attr("y", d => yScale(d))
+                    .attr("width", xScale.bandwidth() / 2)
+                    .attr("height", d => height - yScale(d))
+                    .attr("fill", "green");
+
+                // Add color labels
+                sceneGroup.append("text")
+                    .attr("x", width - 80)
+                    .attr("y", height + margin.bottom * 0.6)
+                    .attr("fill", "blue")
+                    .text("Average Highway MPG");
+
+                sceneGroup.append("text")
+                    .attr("x", width - 80)
+                    .attr("y", height + margin.bottom * 0.8)
+                    .attr("fill", "green")
+                    .text("Average City MPG");
+                
+                // Annotation point - based on coordinates of the point to annotate
+                const xAnnotationCoordinate = 500;
+                const yAnnotationCoordinate = 126.21644295;
+                
+                // Create annotations for specific data points
+                const annotations = [
+                    {
+                        note: {
+                            label: "Our electric cars are the most fuel efficient on the highway and city!",
+                            bgPadding: { top: 10, left: 5, right: 5, bottom: 5 },
+                        },
+                        x: xAnnotationCoordinate, // x-coordinate of the point on chart to annotate
+                        y: yAnnotationCoordinate, // y-coordinate of the point on chart to annotate
+                        dx: -150, // Adjust horizontal positioning of the annotation
+                        dy: -50, // Adjust vertical positioning of the annotation
+                    }
+                ];
+
+                // Create a group to hold the annotation
+                const annotationGroup = sceneGroup.append("g")
+                    .attr("class", "annotation-group");
+
+                // Add the annotation to the chart
+                const makeAnnotation = d3.annotation()
+                    .type(d3.annotationLabel)
+                    .annotations(annotations)
+                    .accessors({
+                        x: function (d) {
+                            return x(d.x);
+                        },
+                        y: function (d) {
+                            return y(d.y);
+                        }
+                    });
+                    
+                annotationGroup.call(makeAnnotation);
+            }
+
+            function renderScene2(sceneGroup) {
+                // extract data for the second scene
+                const carCompanies = [
+                    "Acura",
+                    "Alfa Romeo",
+                    "Aston Martin",
+                    "Audi",
+                    "Bentley",
+                    "BMW",
+                    "Buick",
+                    "Cadillac",
+                    "Chevrolet",
+                    "Chrysler",
+                    "Dodge",
+                    "Ferrari",
+                    "Fiat",
+                    "Ford",
+                    "Genesis",
+                    "GMC",
+                    "Honda",
+                    "Hyundai",
+                    "Infiniti",
+                    "Jaguar",
+                    "Jeep",
+                    "Kia",
+                    "Lamborghini",
+                    "Land Rover",
+                    "Lexus",
+                    "Lincoln",
+                    "Lotus",
+                    "Maserati",
+                    "Mazda",
+                    "McLaren Automotive",
+                    "Mercedes-Benz",
+                    "MINI",
+                    "Mitsubishi",
+                    "Nissan",
+                    "Porsche",
+                    "Ram",
+                    "Rolls-Royce",
+                    "Roush Performance",
+                    "smart",
+                    "Subaru",
+                    "Tesla",
+                    "Toyota",
+                    "Volkswagen",
+                    "Volvo"
+                ];
+
+                // Initialize empty arrays to store average MPG values for each car company
+                let averageHighwayMPGs = [];
+                let averageCityMPGs = [];
+
+                // Loop through the carCompanies array to filter and extract data
+                carCompanies.forEach(company => {
+                    // Filter the data for the current company
+                    const filteredData = data.filter(d => d.Make === company);
+
+                    // Calculate the average highway MPG and average city MPG for the current company type
+                    const averageHighwayMPG = d3.mean(filteredData, d => d.AverageHighwayMPG);
+                    const averageCityMPG = d3.mean(filteredData, d => d.AverageCityMPG);
+
+                    // Push the average MPG values to the corresponding arrays
+                    averageHighwayMPGs.push(averageHighwayMPG);
+                    averageCityMPGs.push(averageCityMPG);
+                });
+
+                // Define x and y scales
+                const xScale = d3.scaleBand()
+                    .domain(carCompanies)
+                    .range([0, width])
+                    .padding(0.2);
+
+                const yScale = d3.scaleLinear()
+                    .domain([0, d3.max(averageHighwayMPGs.concat(averageCityMPGs))])
+                    .range([height, 0]);
+
+                // Draw the x and y axes
+                sceneGroup.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(xScale))
+                    .selectAll("text")
+                    .style("text-anchor", "end")
+                    .attr("dx", "-.8em")
+                    .attr("dy", ".15em")
+                    .attr("transform", "rotate(-65)"); // Rotate the x-axis labels to avoid overlapping
+
+                sceneGroup.append("g")
+                    .call(d3.axisLeft(yScale).ticks(10))
+                    .append("text") // Y-axis title
+                    .attr("x", -height / 2)
+                    .attr("y", -margin.left * 0.8)
+                    .attr("fill", "black")
+                    .attr("font-size", "16px")
+                    .attr("text-anchor", "middle")
+                    .attr("transform", "rotate(-90)")
+                    .text("Fuel Efficiency (Miles per Gallon)");
+
+                // Draw the grouped bars for average highway MPG
+                sceneGroup.selectAll(".bar-highway")
+                    .data(averageHighwayMPGs)
+                    .enter().append("rect")
+                    .attr("class", "bar-highway")
+                    .attr("x", (d, i) => xScale(carCompanies[i]))
+                    .attr("y", d => yScale(d))
+                    .attr("width", xScale.bandwidth() / 3) // Decrease the width of the bars
+                    .attr("height", d => height - yScale(d))
+                    .attr("fill", "blue");
+
+                // Draw the grouped bars for average city MPG
+                sceneGroup.selectAll(".bar-city")
+                    .data(averageCityMPGs)
+                    .enter().append("rect")
+                    .attr("class", "bar-city")
+                    .attr("x", (d, i) => xScale(carCompanies[i]) + xScale.bandwidth() / 3) // Shift the bars to avoid overlapping
+                    .attr("y", d => yScale(d))
+                    .attr("width", xScale.bandwidth() / 3) // Decrease the width of the bars
+                    .attr("height", d => height - yScale(d))
+                    .attr("fill", "green");
+
+                // Add color labels
+                sceneGroup.append("text")
+                    .attr("x", width - 80)
+                    .attr("y", height + margin.bottom * 0.6)
+                    .attr("fill", "blue")
+                    .text("Average Highway MPG");
+
+                sceneGroup.append("text")
+                    .attr("x", width - 80)
+                    .attr("y", height + margin.bottom * 0.8)
+                    .attr("fill", "green")
+                    .text("Average City MPG");
+                
+                // Annotation point - based on coordinates of the point to annotate
+                const xAnnotationCoordinate = 909.5022644;
+                const yAnnotationCoordinate = 126.21644295;
+                
+                // Create annotations for specific data points
+                const annotations = [
+                    {
+                        note: {
+                            label: "The Tesla is the most fuel efficient car in our stock!",
+                            bgPadding: { top: 10, left: 5, right: 5, bottom: 5 },
+                        },
+                        x: xAnnotationCoordinate, // x-coordinate of the point on chart to annotate
+                        y: yAnnotationCoordinate, // y-coordinate of the point on chart to annotate
+                        dx: -150, // Adjust horizontal positioning of the annotation
+                        dy: -50, // Adjust vertical positioning of the annotation
+                    }
+                ];
+
+                // Create a group to hold the annotation
+                const annotationGroup = sceneGroup.append("g")
+                    .attr("class", "annotation-group");
+
+                // Add the annotation to the chart
+                const makeAnnotation = d3.annotation()
+                    .type(d3.annotationLabel)
+                    .annotations(annotations)
+                    .accessors({
+                        x: function (d) {
+                            return x(d.x);
+                        },
+                        y: function (d) {
+                            return y(d.y);
+                        }
+                    });
+                    
+                annotationGroup.call(makeAnnotation);
+            }
+        });
+    </script>
+    </body>
+</html>

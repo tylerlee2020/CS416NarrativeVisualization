@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+    <style>
+        circle {fill: lightblue; stroke: black;}
+        /* Style for the "Next Scene" button */
+        button {
+            position: relative;
+            bottom: 20px;
+            right: 0px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+    <body>
+    <!-- Add an element with the id "header" to hold the header text -->
+    <h1 id="header">Default Header</h1>
+    <!-- Add a container element to hold the paragraphs -->
+    <div id="paragraphContainer"></div>
+    <svg width=1200 height=1000></svg>
+    <button id="backButton">Click to go back to the main engine cylinder page</button> <!-- Add the button for going back -->
+    <script>
+        // load the car data
+        const carData = "https://gist.githubusercontent.com/tylerlee2020/418c6ddb3d52324dad9fb43dfbf85c4d/raw/a2fd06798136ba869f5da5388fabb6d1193a5a74/cars2017.csv";
+        let svg, margin, width, height, g;
+
+        const sceneText = {
+            header: "Dynamic Drive: Unleashing the Perfect Balance",
+            paragraphs: [
+                "In this category, we explore cars equipped with not too little or not too many engine\
+                cylinders, offering the ultimate synergy of power and efficiency. These vehicles promise\
+                an exhilarating driving experience while maintaining impressive fuel economy, making \
+                them a top choice for those seeking the best of both worlds.",
+                "You can see the data for yourself by viewing the chart below. The x-axis represents the\
+                average miles per gallon of the car in cities, while the y-axis represents the average \
+                miles per gallon of the car on highways. The points represent a car in the 'more cylinders'\
+                category.",
+                "If you hover over any of the data points, you will be able to see more information\
+                about the car you're hovering over. This includes the company that made the car, the fuel type\
+                (gasoline, electric, or diesel), the exact number of engine cylinders, and the exact values of\
+                miles per gallon in the city and on the highway. The details will be shown on the bottom of the page\
+                when you hover over.",
+                "Points that are larger in size represent more engine cylinders.",
+                "To go back to the main engine cylinder page, scroll to the bottom and click the blue button."
+            ]
+        }
+
+        d3.csv(carData).then(function (data) {
+            // parse the data values accordingly
+            data.forEach(function (d) {
+                d.companies = d.Make;
+                d.fuel = d.Fuel;
+                d.engineCylinders = +d.EngineCylinders;
+                d.averageHighwayMPG = +d.AverageHighwayMPG;
+                d.averageCityMPG = +d.AverageCityMPG;
+            });
+
+            // Filter the data based on EngineCylinders values between 5 and 6 (inclusive)
+            const filteredData = data.filter(function(d) {
+                const engineCylinders = +d.EngineCylinders;
+                return engineCylinders >= 5 && engineCylinders <= 6;
+            });
+
+            // Initialize global SVG, margin, width, height, and g
+            svg = d3.select("svg");
+            margin = { top: 50, right: 100, bottom: 100, left: 100 };
+            width = +svg.attr("width") - margin.left - margin.right;
+            height = +svg.attr("height") - margin.top - margin.bottom;
+            g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            // Add event listener to the back button
+            document.getElementById("backButton").addEventListener("click", function () {
+                window.location.href = "main-engine-cylinder-scene.html";
+                renderScene();
+            });
+
+            // Function to render the scene
+            function renderScene() {
+                // Clear the visualization container
+                g.selectAll("*").remove();
+
+                d3.select("#paragraphContainer").html("");
+
+                // Update header and paragraph text
+                const headerElement = document.getElementById("header");
+
+                // Display multiple paragraphs for the scene
+                const paragraphContainer = d3.select("#paragraphContainer");
+                sceneText.paragraphs.forEach(paragraph => {
+                    paragraphContainer.append("p").text(paragraph);
+                });
+
+                headerElement.textContent = sceneText.header;
+
+                // Create a tooltip element
+                const tooltip = d3.select("body").append("div")
+                    .attr("class", "tooltip")
+                    .style("opacity", 0);
+
+                var svg = d3.select('svg')
+                    .append('g')
+                    .attr('transform', 'translate(100,100)');
+
+                var x = d3.scaleLog()
+                    .domain([10, 150])
+                    .range([0, 1000]);
+
+                var y = d3.scaleLog()
+                    .domain([10, 150])
+                    .range([800, 0]);
+
+
+                // create circles for each data point
+                svg.selectAll('circle')
+                    .data(filteredData)
+                    .enter()
+                    .append('circle')
+                    .attr('cx', function(d) { return x(d.averageCityMPG); })
+                    .attr('cy', function(d) { return y(d.averageHighwayMPG); })
+                    .attr('r', function(d) { return 2 + d.engineCylinders; })
+                    .on("mouseover", function(event, d) {
+                        // Show tooltip on mouseover
+                        tooltip.transition()
+                            .duration(200)
+                            .style("opacity", 0.9);
+
+                        // Calculate the position of the tooltip to the right of the data point
+                        const tooltipX = event.pageX + 1000; // Shift the tooltip 10 pixels to the right
+                        const tooltipY = event.pageY - 28; // Adjust the vertical position if needed
+
+                        tooltip.html(`Company: ${d.companies}<br>Fuel: ${d.fuel}<br>Engine Cylinders: ${d.engineCylinders}<br>Average Highway MPG: ${d.averageHighwayMPG}<br>Average City MPG: ${d.averageCityMPG}`)
+                            .style("left", tooltipX + "px")
+                            .style("top", tooltipY + "px");
+                    })
+                    .on("mouseout", function(d) {
+                        // Hide tooltip on mouseout
+                        tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                    });
+                
+
+                var yAxis = d3.axisLeft(y)
+                    .tickValues([10, 20, 50])
+                    .tickFormat(d3.format('~s'));
+                svg.append('g')
+                    .call(yAxis);
+
+                var xAxis = d3.axisBottom(x)
+                    .tickValues([10, 20, 50])
+                    .tickFormat(d3.format('~s'));
+                svg.append('g')
+                    .attr('transform', 'translate(0,800)') // Adjusted position to fit the 1000 height
+                    .call(xAxis);
+                    
+                // Add x-axis title
+                svg.append('text')
+                    .attr('x', 500) // Adjusted position to center it horizontally
+                    .attr('y', 840) // Adjusted position to place it below the x-axis
+                    .attr('text-anchor', 'middle')
+                    .text('Average City MPG');
+
+                // Add y-axis title
+                svg.append('text')
+                    .attr('x', -400) // Adjusted position to place it to the left of the y-axis
+                    .attr('y', -50) // Adjusted position to center it vertically
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'rotate(-90)') // Rotating the text to align vertically
+                    .text('Average Highway MPG');
+                
+                // Annotation point - based on cx and cy of the point to annotate
+                const xAnnotationCoordinate = 307.567823;
+                const yAnnotationCoordinate = 485.467947;
+                
+                // Create annotations for specific data points
+                const annotations = [
+                    {
+                        note: {
+                            label: "BMW, Diesel, 6 engine cylinders, 29 AVG MPG on Highway, 23 AVG MPG in City",
+                            bgPadding: { top: 10, left: 5, right: 5, bottom: 5 },
+                            title: "Hover over any of the points and scroll down to see the details! Here's an example!",
+                        },
+                        x: xAnnotationCoordinate, // x-coordinate of the data point to annotate
+                        y: yAnnotationCoordinate, // y-coordinate of the data point to annotate
+                        dx: -50, // Adjust horizontal positioning of the annotation
+                        dy: -50, // Adjust vertical positioning of the annotation
+                    }
+                ];
+
+                // Create a group to hold the annotation
+                const annotationGroup = svg.append("g")
+                    .attr("class", "annotation-group");
+
+                // Add the annotation to the chart
+                const makeAnnotation = d3.annotation()
+                    .type(d3.annotationLabel)
+                    .annotations(annotations)
+                    .accessors({
+                        x: function (d) {
+                            return x(d.x);
+                        },
+                        y: function (d) {
+                            return y(d.y);
+                        }
+                    });
+                    
+                annotationGroup.call(makeAnnotation);
+            }
+
+            // call the function to render the initial scene
+            renderScene();
+        });
+    </script>
+    </body>
+</html>
